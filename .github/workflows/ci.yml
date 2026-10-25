@@ -1,0 +1,39 @@
+# CI/CD layer: every push and pull request is type-checked, tested and built.
+# Vercel deploys main to production and every PR to a preview URL.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+        env:
+          SESSION_SECRET: ci-only-secret-ci-only-secret-ci-only
+      - name: Check migrations match the schema
+        run: npx drizzle-kit generate --name ci-check && git diff --exit-code drizzle/ || (echo "Run npm run db:generate and commit the migration" && exit 1)
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm audit --omit=dev --audit-level=high

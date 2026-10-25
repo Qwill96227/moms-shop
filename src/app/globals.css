@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #221b3a;
+  --color-ink-soft: #4a4363;
+  --color-paper: #f5f4fa;
+  --color-shell: #ece6f4;
+  --color-marigold: #f2a93b;
+  --color-okra: #2f6b4f;
+  --color-hibiscus: #d3456c;
+  --color-hibiscus-dark: #a92d52;
+  --color-denim: #3d5a99;
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+
+h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
+
+:focus-visible { outline: 3px solid var(--color-denim); outline-offset: 3px; border-radius: 4px; }
+
+/* The one signature detail: a running stitch, like the edge of a quilt block. */
+.stitch { position: relative; }
+.stitch::after {
+  content: ""; position: absolute; inset: 10px; pointer-events: none;
+  border: 2px dashed color-mix(in oklab, currentColor 45%, transparent);
+  border-radius: inherit;
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  min-height: 48px; padding: 0 1.5rem; border-radius: 999px;
+  font-family: var(--font-display); font-weight: 700; font-size: 1.05rem;
+  transition: background-color .15s, transform .15s;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--color-ink); color: var(--color-paper); }
+.btn-primary:hover { background: #352c57; }
+.btn-primary:disabled { background: #8a85a0; cursor: not-allowed; }
+.btn-ghost { border: 2px solid var(--color-ink); }
+.btn-ghost:hover { background: var(--color-shell); }
+
+.input {
+  width: 100%; min-height: 44px; padding: .55rem .8rem; border-radius: 10px;
+  border: 2px solid #cfc8de; background: #fff; color: var(--color-ink);
+}
+.input:focus { border-color: var(--color-denim); outline: none; }
+.label { display: block; font-weight: 700; margin-bottom: .3rem; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .quilt-in > * { animation: piece .5s cubic-bezier(.2,.7,.2,1) both; }
+  .quilt-in > *:nth-child(2) { animation-delay: .06s } .quilt-in > *:nth-child(3) { animation-delay: .12s }
+  .quilt-in > *:nth-child(4) { animation-delay: .18s } .quilt-in > *:nth-child(5) { animation-delay: .24s }
+  .quilt-in > *:nth-child(6) { animation-delay: .30s } .quilt-in > *:nth-child(7) { animation-delay: .36s }
+  @keyframes piece { from { opacity: 0; transform: scale(.94); } }
+}
