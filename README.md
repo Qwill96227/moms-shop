@@ -21,9 +21,11 @@ To sign in at `/admin`, put these in `.env.local` before the first sign-in:
 
 ```
 ADMIN_EMAIL=you@example.com
-ADMIN_PASSWORD=at-least-12-characters
+ADMIN_PASSWORD=
 ADMIN_NAME=Mom
 ```
+
+Choose the password yourself (12+ characters). `.env.local` is git-ignored, so it never gets committed. Never put real passwords or keys in any committed file; in production they live only in Vercel's environment variables.
 
 ```bash
 npm test            # 14 tests: pricing, stock, idempotent payments, auth, rate limits

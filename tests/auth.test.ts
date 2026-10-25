@@ -13,7 +13,7 @@ describe("admin sessions", () => {
     const forged = `${h}.${Buffer.from(JSON.stringify({ sub: "7", role: "owner" })).toString("base64url")}.${s}`;
     expect(await verifySession(forged)).toBeNull();
     const other = await new SignJWT({ role: "owner" }).setProtectedHeader({ alg: "HS256" }).setSubject("1")
-      .sign(new TextEncoder().encode("some-other-secret-some-other-secret-xx"));
+      .sign(crypto.getRandomValues(new Uint8Array(32)));
     expect(await verifySession(other)).toBeNull();
     expect(await verifySession(undefined)).toBeNull();
   });

@@ -19,13 +19,15 @@ export type Session = { userId: number; name: string; role: Role };
 const COOKIE = "shop_session";
 const MAX_AGE = 60 * 60 * 24 * 7;
 
+// No secret value ever lives in the code. Production requires SESSION_SECRET;
+// local dev without one gets a random key per run (you just sign in again after a restart).
+let devKey: Uint8Array | undefined;
 function secret() {
   const s = process.env.SESSION_SECRET;
-  if (!s || s.length < 32) {
-    if (process.env.NODE_ENV === "production") throw new Error("SESSION_SECRET must be at least 32 characters");
-    return new TextEncoder().encode("dev-only-secret-change-me-dev-only-secret");
-  }
-  return new TextEncoder().encode(s);
+  if (s && s.length >= 32) return new TextEncoder().encode(s);
+  if (process.env.NODE_ENV === "production") throw new Error("SESSION_SECRET must be set (32+ characters)");
+  devKey ??= crypto.getRandomValues(new Uint8Array(32));
+  return devKey;
 }
 
 export async function signSession(session: Session) {
@@ -78,12 +80,15 @@ async function bootstrapOwner() {
   }).onConflictDoNothing();
 }
 
+let dummyHash: Promise<string> | undefined;
+
 export async function checkCredentials(email: string, password: string) {
   await bootstrapOwner();
   const db = await getDb();
   const [user] = await db.select().from(adminUsers).where(eq(adminUsers.email, email.toLowerCase().trim())).limit(1);
   // Compare against a dummy hash when the user doesn't exist so timing doesn't leak which emails are real.
-  const ok = await bcrypt.compare(password, user?.passwordHash ?? "$2b$12$/HTrygy1f78O6KVblZA4B.Y8HHPkFVUtMuJv97RcC5Lwa7LI71IyG");
+  dummyHash ??= bcrypt.hash(crypto.randomUUID(), 12);
+  const ok = await bcrypt.compare(password, user?.passwordHash ?? (await dummyHash));
   return ok && user ? user : null;
 }
 

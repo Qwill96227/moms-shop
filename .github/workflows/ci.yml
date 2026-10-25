@@ -24,9 +24,8 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
-      - run: npm run build
-        env:
-          SESSION_SECRET: ci-only-secret-ci-only-secret-ci-only
+      - name: Build
+        run: SESSION_SECRET="$(openssl rand -base64 48)" npm run build
       - name: Check migrations match the schema
         run: npx drizzle-kit generate --name ci-check && git diff --exit-code drizzle/ || (echo "Run npm run db:generate and commit the migration" && exit 1)
   audit:
